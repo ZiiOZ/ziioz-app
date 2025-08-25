@@ -1,0 +1,8 @@
+// File: com/ziioz/app/network/ApiClient.kt
+package com.ziioz.app.network
+
+object ApiClient {
+    val apiService: ApiService by lazy {
+        RetrofitInstance.retrofit.create(ApiService::class.java)
+    }
+}
