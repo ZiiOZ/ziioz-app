@@ -9,8 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun HomeScreen() {
+fun ZScreen() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Home • placeholder", style = MaterialTheme.typography.titleMedium)
+        Text("Z • explore coming soon!", style = MaterialTheme.typography.titleMedium)
     }
 }

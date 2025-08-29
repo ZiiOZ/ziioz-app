@@ -1,9 +1,9 @@
-// app/build.gradle.kts (Module: app)
+// app/build.gradle.kts
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    // id("com.google.gms.google-services") // enable only after google-services.json exists
+    // id("com.google.gms.google-services") // enable only when google-services.json exists
 }
 
 val ziiStorePath = (project.findProperty("ZII_KEYSTORE") ?: "keystore/ziioz-upload.jks").toString()
@@ -34,7 +34,9 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions { kotlinCompilerExtensionVersion = "1.5.14" }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.14"
+    }
 
     signingConfigs {
         create("release") {
@@ -51,7 +53,6 @@ android {
             isShrinkResources = false
             // Phone -> PC during dev (update PORT if needed)
             buildConfigField("String", "API_BASE_URL", "\"http://127.0.0.1:3000/\"")
-
         }
         release {
             signingConfig = signingConfigs.getByName("release")
@@ -70,44 +71,56 @@ android {
 repositories {
     google()
     mavenCentral()
-    maven(url = "https://dl.google.com/dl/android/maven2/")
-    maven(url = "https://maven.google.com")
 }
 
 dependencies {
-    // --- Compose / AndroidX ---
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // --- Compose BOM (pick a known stable) ---
+    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.06.00"))
+
+    // --- Core / Activity / Lifecycle ---
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.activity:activity-compose:1.9.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
-    implementation(platform("androidx.compose:compose-bom:2024.10.01"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    implementation("androidx.compose.foundation:foundation")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.runtime:runtime-saveable")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // --- Compose UI ---
+    implementation(platform("androidx.compose:compose-bom:2025.01.00"))
     implementation("androidx.activity:activity-compose:1.9.2")
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.runtime:runtime")
+    implementation("androidx.compose.animation:animation")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
+
+    // --- Navigation ---
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // --- Splash (if you use it) ---
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     // --- Networking: Retrofit + OkHttp + Gson ---
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation("com.google.code.gson:gson:2.11.0")
 
     // --- Extras ---
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("androidx.browser:browser:1.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
+    // --- Tests ---
     testImplementation("junit:junit:4.13.2")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+
+    // Snap fling for LazyRow
+    implementation("androidx.compose.foundation:foundation-layout") // has SnapFlingBehavior
+    implementation("androidx.compose.foundation:foundation:1.7.2")
+
+    // Images & video
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("com.google.android.exoplayer:exoplayer:2.19.1")
 }

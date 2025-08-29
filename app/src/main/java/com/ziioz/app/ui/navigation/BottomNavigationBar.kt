@@ -1,29 +1,31 @@
-package com.ziioz.app.components
+package com.ziioz.app.ui.navigation
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.ziioz.app.navigation.MainNavItems
 
 @Composable
-fun BottomBar(nav: NavController) {
-    val currentRoute = nav.currentBackStackEntryAsState().value?.destination?.route
+fun BottomNavigationBar(navController: NavController) {
+    val backStack by navController.currentBackStackEntryAsState()
+    val currentRoute = backStack?.destination?.route
+
     NavigationBar {
-        MainNavItems.forEach { item ->
+        BottomNavItem.items.forEach { item ->
             NavigationBarItem(
                 selected = currentRoute == item.route,
                 onClick = {
                     if (currentRoute != item.route) {
-                        nav.navigate(item.route) {
-                            popUpTo(nav.graph.startDestinationId) { saveState = true }
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
                     }
                 },
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) }
+                icon = { Icon(item.icon, contentDescription = item.title) },
+                label = { Text(item.title) }
             )
         }
     }
