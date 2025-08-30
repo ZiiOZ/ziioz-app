@@ -3,13 +3,18 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    // id("com.google.gms.google-services") // enable only when google-services.json exists
+    // id("com.google.gms.google-services") // enable only if google-services.json exists
 }
 
-val ziiStorePath = (project.findProperty("ZII_KEYSTORE") ?: "keystore/ziioz-upload.jks").toString()
-val ziiStorePass = (project.findProperty("ZII_KEYSTORE_PASSWORD") ?: "").toString()
-val ziiKeyAlias  = (project.findProperty("ZII_KEY_ALIAS") ?: "upload").toString()
-val ziiKeyPass   = (project.findProperty("ZII_KEY_PASSWORD") ?: ziiStorePass).toString()
+// ---- Signing props pulled from gradle.properties (with safe fallbacks) ----
+val RELEASE_STORE_FILE: String =
+    (project.findProperty("RELEASE_STORE_FILE") as String?) ?: "app/keystore/ziioz-upload.jks"
+val RELEASE_STORE_PASSWORD: String =
+    (project.findProperty("RELEASE_STORE_PASSWORD") as String?) ?: ""
+val RELEASE_KEY_ALIAS: String =
+    (project.findProperty("RELEASE_KEY_ALIAS") as String?) ?: "ziioz-upload"
+val RELEASE_KEY_PASSWORD: String =
+    (project.findProperty("RELEASE_KEY_PASSWORD") as String?) ?: RELEASE_STORE_PASSWORD
 
 android {
     namespace = "com.ziioz.app"
@@ -38,12 +43,16 @@ android {
         kotlinCompilerExtensionVersion = "1.5.14"
     }
 
+    // ---- SINGLE signingConfigs block (no duplicates) ----
     signingConfigs {
-        create("release") {
-            storeFile = file(ziiStorePath)
-            storePassword = ziiStorePass
-            keyAlias = ziiKeyAlias
-            keyPassword = ziiKeyPass
+        maybeCreate("release").apply {
+            storeFile = file(RELEASE_STORE_FILE)
+            storePassword = RELEASE_STORE_PASSWORD
+            keyAlias = RELEASE_KEY_ALIAS
+            keyPassword = RELEASE_KEY_PASSWORD
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
 
@@ -74,53 +83,44 @@ repositories {
 }
 
 dependencies {
-    // --- Compose BOM (pick a known stable) ---
-    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.06.00"))
+    // Use ONE Compose BOM
+    implementation(platform("androidx.compose:compose-bom:2025.01.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2025.01.00"))
 
-    // --- Core / Activity / Lifecycle ---
+    // Core / Activity / Lifecycle
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.activity:activity-compose:1.9.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // --- Compose UI ---
-    implementation(platform("androidx.compose:compose-bom:2025.01.00"))
-    implementation("androidx.activity:activity-compose:1.9.2")
+    // Compose UI (no explicit versions when using BOM)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.compose.animation:animation")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
 
-    // --- Navigation ---
+    // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
-    // --- Splash (if you use it) ---
+    // Splash
     implementation("androidx.core:core-splashscreen:1.0.1")
 
-    // --- Networking: Retrofit + OkHttp + Gson ---
+    // Networking: Retrofit + OkHttp + Moshi
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-
-    // --- Extras ---
-    implementation("io.coil-kt:coil-compose:2.6.0")
-    implementation("androidx.browser:browser:1.8.0")
-
-    // --- Tests ---
-    testImplementation("junit:junit:4.13.2")
-
-    // Snap fling for LazyRow
-    implementation("androidx.compose.foundation:foundation-layout") // has SnapFlingBehavior
-    implementation("androidx.compose.foundation:foundation:1.7.2")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
 
     // Images & video
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.google.android.exoplayer:exoplayer:2.19.1")
+
+    // Browser (for external links)
+    implementation("androidx.browser:browser:1.8.0")
+
+    // Tests
+    testImplementation("junit:junit:4.13.2")
 }

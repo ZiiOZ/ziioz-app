@@ -10,14 +10,8 @@ import com.ziioz.app.ui.navigation.NavGraph
 
 @Composable
 fun App() {
-    val navController = rememberNavController()
-
+    val nav = rememberNavController()
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
-    ) { innerPadding ->
-        NavGraph(
-            navController = navController,
-            modifier = Modifier.padding(innerPadding)
-        )
-    }
+        bottomBar = { BottomNavigationBar(nav) }
+    ) { inner -> NavGraph(nav, Modifier.padding(inner)) }
 }

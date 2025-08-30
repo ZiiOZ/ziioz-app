@@ -1,18 +1,1 @@
-﻿# Android/Gradle
-.gradle/
-**/build/
-local.properties
-captures/
-.externalNativeBuild/
-.cxx/
-# Android Studio
-.idea/
-*.iml
-# OS junk
-.DS_Store
-Thumbs.db
-# Keystores (never commit real ones)
-*.jks
-*.keystore
-# Logs
-*.log
+﻿app/keystore/
