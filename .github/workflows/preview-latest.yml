@@ -1,0 +1,31 @@
+﻿name: Preview APK (Latest)
+on:
+  push:
+    branches: [ preview ]
+    paths: [ "app/**", "**/*.kt", "build.gradle*", "gradle/**", "settings.gradle*" ]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - name: Make gradlew executable (Linux)
+        run: chmod +x ./gradlew
+      - name: Build debug APK
+        run: ./gradlew clean :app:assembleDebug
+      - name: Publish/Update preview-latest release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: preview-latest
+          name: "Preview (latest)"
+          body: "Auto-built from branch 'preview' – ${{ github.sha }}"
+          allowUpdates: true
+          replacesArtifacts: true
+          artifacts: app/build/outputs/apk/debug/app-debug.apk
